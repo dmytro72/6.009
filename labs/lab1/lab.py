@@ -16,23 +16,44 @@ class Image:
         self.height = height
         self.pixels = pixels
 
+    def _get_index(self, x, y):
+        """
+        Compute index of the pixel in a row-major list of pixels
+        """
+        if 0 <= x < self.width \
+            and 0 <= y < self.height:
+            return y * self.width + x
+        raise ValueError
+
     def get_pixel(self, x, y):
-        return self.pixels[x, y]
+        """
+        Return a value of the pixel
+        """
+        return self.pixels[self._get_index(x, y)]
 
     def set_pixel(self, x, y, c):
-        self.pixels[x, y] = c
+        """
+        Change a value of the pixel
+        """
+        self.pixels[self._get_index(x, y)] = c
 
     def apply_per_pixel(self, func):
-        result = Image.new(self.height, self.width)
+        """
+        Apply function to the every pixel
+        """
+        result = Image.new(self.width, self.height)
         for x in range(result.width):
             for y in range(result.height):
                 color = self.get_pixel(x, y)
                 newcolor = func(color)
-            result.set_pixel(y, x, newcolor)
+                result.set_pixel(x, y, newcolor)
         return result
 
     def inverted(self):
-        return self.apply_per_pixel(lambda c: 256-c)
+        """
+        Invert value of pixels
+        """
+        return self.apply_per_pixel(lambda c: 255-c)
 
     def blurred(self, n):
         raise NotImplementedError
