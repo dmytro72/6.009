@@ -121,7 +121,21 @@ class Image:
         return self.correlate(kernel)._clip()
 
     def edges(self):
-        raise NotImplementedError
+        """
+        Apply Sobel operator to te image. Result is a new image
+        """
+        kx = ((-1, 0, 1),
+              (-2, 0, 2),
+              (-1, 0, 1))
+        ky = ((-1, -2, -1),
+              (0, 0, 0),
+              (1, 2, 1))
+        ox = self.correlate(kx)
+        oy = self.correlate(ky)
+        return Image(self.width,
+                     self.height,
+                     [math.sqrt(a**2 + b**2)
+                      for a, b in zip(ox.pixels, oy.pixels)])._clip()
 
     # Below this point are utilities for loading, saving, and displaying
     # images, as well as for testing.
