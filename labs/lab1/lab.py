@@ -8,7 +8,8 @@ import tkinter
 from io import BytesIO
 from PIL import Image as PILImage
 
-## NO ADDITIONAL IMPORTS ALLOWED!
+# NO ADDITIONAL IMPORTS ALLOWED!
+
 
 class Image:
     def __init__(self, width, height, pixels):
@@ -20,16 +21,28 @@ class Image:
         """
         Compute index of the pixel in a row-major list of pixels
         """
-        if 0 <= x < self.width \
-            and 0 <= y < self.height:
-            return y * self.width + x
-        raise ValueError
+        return y * self.width + x
 
     def get_pixel(self, x, y):
         """
         Return a value of the pixel
         """
         return self.pixels[self._get_index(x, y)]
+
+    @staticmethod
+    def _transform_coordinate(x, max_x):
+        """
+        If coordinate is not in domain, return correct coordinate in domain
+        """
+        return min(max(0, x), max_x-1)
+
+    def get_unbounded_pixel(self, x, y):
+        """
+        Can return a value of the pixel for coordinates, which not in domain
+        """
+        x_transformed = self._transform_coordinate(x, self.width)
+        y_transformed = self._transform_coordinate(y, self.height)
+        return self.get_pixel(x_transformed, y_transformed)
 
     def set_pixel(self, x, y, c):
         """
@@ -55,6 +68,24 @@ class Image:
         """
         return self.apply_per_pixel(lambda c: 255-c)
 
+    def correlate(self, kernel):
+        """
+        Apply kernel to image and yield a new image
+        """
+        result = Image.new(self.width, self.height)
+        kern_size = len(kernel)
+        center = kern_size // 2
+        for base_x in range(self.width):
+            x = base_x - center
+            for base_y in range(self.height):
+                y = base_y - center
+                c = 0
+                for dx in range(kern_size):
+                    for dy in range(kern_size):
+                        c += self.get_unbounded_pixel(x+dx, y+dy) * kernel[dy][dx]
+                result.set_pixel(base_x, base_y, c)
+        return result
+
     def blurred(self, n):
         raise NotImplementedError
 
@@ -63,7 +94,6 @@ class Image:
 
     def edges(self):
         raise NotImplementedError
-
 
     # Below this point are utilities for loading, saving, and displaying
     # images, as well as for testing.
@@ -107,7 +137,7 @@ class Image:
         Invoked as, for example:
             i = Image.new(640, 480)
         """
-        return cls(width, height, [0 for i in range(width*height)])
+        return cls(width, height, [0 for _ in range(width*height)])
 
     def save(self, fname, mode='PNG'):
         """
@@ -153,6 +183,7 @@ class Image:
         canvas.pack()
         canvas.img = tkinter.PhotoImage(data=self.gif_data())
         canvas.create_image(0, 0, image=canvas.img, anchor=tkinter.NW)
+
         def on_resize(event):
             # handle resizing the image when the window is resized
             # the procedure is:
@@ -182,9 +213,10 @@ try:
     tk_root = tkinter.Tk()
     tk_root.withdraw()
     tcl = tkinter.Tcl()
+
     def reafter():
-        tcl.after(500,reafter)
-    tcl.after(500,reafter)
+        tcl.after(500, reafter)
+    tcl.after(500, reafter)
 except:
     tk_root = None
 WINDOWS_OPENED = False
