@@ -11,11 +11,11 @@ from PIL import Image as PILImage
 # NO ADDITIONAL IMPORTS ALLOWED!
 
 
-def create_blur_kernel(n):
+def create_blur_kernel(n, c=1):
     """
     Create kernel for box blur
     """
-    val = 1 / n ** 2
+    val = c / n ** 2
     return [[val] * n for _ in range(n)]
 
 
@@ -112,7 +112,13 @@ class Image:
         return self.correlate(kernel)._clip()
 
     def sharpened(self, n):
-        raise NotImplementedError
+        """
+        Apply unsharp mask filter to the image. Result is a new image
+        """
+        kernel = create_blur_kernel(n, -1)
+        center = n // 2
+        kernel[center][center] += 2
+        return self.correlate(kernel)._clip()
 
     def edges(self):
         raise NotImplementedError
