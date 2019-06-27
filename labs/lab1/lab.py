@@ -11,6 +11,14 @@ from PIL import Image as PILImage
 # NO ADDITIONAL IMPORTS ALLOWED!
 
 
+def create_blur_kernel(n):
+    """
+    Create kernel for box blur
+    """
+    val = 1 / n ** 2
+    return [[val] * n for _ in range(n)]
+
+
 class Image:
     def __init__(self, width, height, pixels):
         self.width = width
@@ -86,8 +94,22 @@ class Image:
                 result.set_pixel(base_x, base_y, c)
         return result
 
+    def _clip(self):
+        """
+        Correct pixels value in the image. Result is a new image
+        """
+        min_val = 0
+        max_val = 255
+        return Image(self.width,
+                     self.height,
+                     [min(max_val, max(min_val, round(c))) for c in self.pixels])
+
     def blurred(self, n):
-        raise NotImplementedError
+        """
+        Apply box blur to the image. Result is a new image
+        """
+        kernel = create_blur_kernel(n)
+        return self.correlate(kernel)._clip()
 
     def sharpened(self, n):
         raise NotImplementedError
