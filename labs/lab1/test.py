@@ -137,5 +137,35 @@ class TestFilters(unittest.TestCase):
                 self.assertEqual(result,  expected)
 
 
+class TestRetarget(unittest.TestCase):
+    def setUp(self):
+        self.img = lab.Image(4, 3, [12, 8, 215, 64, 210, 45, 110, 76, 85, 90, 12, 150])
+
+    def test_find_min_column(self):
+        result = self.img._find_min_column()
+        self.assertEqual(result, 1)
+
+    def test_remove_column(self):
+        result = self.img
+        result._remove_column(1)
+        expected = lab.Image(3, 3, [12, 215, 64, 210, 110, 76, 85, 12, 150])
+        self.assertEqual(result, expected)
+
+    def test_get_cumulative_map(self):
+        result = self.img
+        result._get_cumulative_map()
+        expected = lab.Image(4, 3, [12, 8, 215, 64, 218, 53, 118, 140, 138, 143, 65, 268])
+        self.assertEqual(result, expected)
+
+    def test_get_min_index(self):
+        result = self.img._get_min_index(1,0, 3)
+        self.assertEqual(result, 1)
+
+    def test_get_min_path(self):
+        result = self.img._get_min_path()
+        expected = [1, 1, 2]
+        self.assertEqual(result, expected)
+
+
 if __name__ == '__main__':
     res = unittest.main(verbosity=3, exit=False)

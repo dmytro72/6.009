@@ -122,7 +122,7 @@ class Image:
 
     def edges(self):
         """
-        Apply Sobel operator to te image. Result is a new image
+        Apply Sobel operator to the image. Result is a new image
         """
         kx = ((-1, 0, 1),
               (-2, 0, 2),
@@ -136,6 +136,83 @@ class Image:
                      self.height,
                      [math.sqrt(a**2 + b**2)
                       for a, b in zip(ox.pixels, oy.pixels)])._clip()
+
+    def _find_min_column(self):
+        """
+        Return index of the column with minimum sum of pixels value
+        """
+        energy_list = [sum(self.get_pixel(x, y) for y in range(self.height))
+                       for x in range(self.width)]
+        return energy_list.index(min(energy_list))
+
+    def _remove_column(self, n):
+        """
+        Delete column n from the image
+        """
+        self.pixels = [c for i, c in enumerate(self.pixels)
+                       if i % self.width != n]
+        self.width -= 1
+
+    def retarget(self, n):
+        """
+        Scale down an image by n columns and preserving important parts
+
+        n smaller then self.width
+        """
+        img = Image(self.width, self.height, self.pixels)
+        for _ in range(n):
+            # compute energy map
+            energy_map = img.edges()
+            # find the minimum energy column
+            i = energy_map._find_min_column()
+            # remove the column
+            img._remove_column(i)
+        return img
+
+    def _get_cumulative_map(self):
+        """
+        Create the cumulative energy map. Modify energy map
+        """
+        for y in range(1, self.height):
+            for x in range(self.width):
+                prev_energy = min(self.get_unbounded_pixel(i, y-1) for i in range(x-1, x+2))
+                self.set_pixel(x, y, prev_energy+self.get_pixel(x, y))
+
+    def _get_min_path(self):
+        """
+        Return x coordinate min path pixels
+        """
+        path = []
+        x = self._get_min_index(self.height-1, 0, self.width-1)
+        path.append(x)
+        for y in range(self.height-2, -1, -1):
+            x = self._get_min_index(y, x-1, x+1)
+            path.append(x)
+        path.reverse()
+        return path
+
+    def _get_min_index(self, y, x_start, x_end):
+        index = min((self.get_unbounded_pixel(x, y), x) for x in range(x_start, x_end+1))[1]
+        return max(0, min(self.width-1, index))
+
+    def seam_carving(self, n):
+        """
+        Seam carving algorithm for shrink image
+        """
+        img = Image(self.width, self.height, self.pixels)
+        for _ in range(n):
+            # compute energy map
+            energy_map = img.edges()
+            # find the minimum-cost path from top to bottom
+            energy_map._get_cumulative_map()
+            path = energy_map._get_min_path()
+            # remove the computed path
+            img.pixels = [img.get_pixel(x, y)
+                          for y in range(img.height)
+                          for x in range(img.width)
+                          if path[y] != x]
+            img.width -= 1
+        return img
 
     # Below this point are utilities for loading, saving, and displaying
     # images, as well as for testing.
