@@ -32,6 +32,34 @@ class TestTiny(unittest.TestCase):
         actor2 = 1640
         self.assertFalse(lab.did_x_and_y_act_together(self.data, actor1, actor2))
 
+    def test_04(self):
+        # actors with Bacon number of 0
+        result = lab.get_actors_with_bacon_number(self.data, 0)
+        expected = {4724}
+        self.assertTrue(isinstance(result, set))
+        self.assertEqual(result, expected)
+
+    def test_05(self):
+        # actors with Bacon number of 1
+        result = lab.get_actors_with_bacon_number(self.data, 1)
+        expected = {2876, 1532}
+        self.assertTrue(isinstance(result, set))
+        self.assertEqual(result, expected)
+
+    def test_06(self):
+        # actors with Bacon number of 2
+        result = lab.get_actors_with_bacon_number(self.data, 2)
+        expected = {1640}
+        self.assertTrue(isinstance(result, set))
+        self.assertEqual(result, expected)
+
+    def test_07(self):
+        # actors with Bacon number of 3
+        result = lab.get_actors_with_bacon_number(self.data, 3)
+        expected = set()
+        self.assertTrue(isinstance(result, set))
+        self.assertEqual(result, expected)
+
 
 class TestActedTogether(unittest.TestCase):
     def setUp(self):

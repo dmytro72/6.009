@@ -2,6 +2,7 @@
 
 import json
 
+BACON_NUMBER = 4724
 
 def did_x_and_y_act_together(data, actor_id_1, actor_id_2):
     """Return True if actors acted in the same film"""
@@ -20,8 +21,28 @@ def get_value(dict, key):
     return dict[key]
 
 
+def get_actor_graph(data):
+    """Create a graph of actors by acting together"""
+    actor_graph = {}
+    for id1, id2, _ in data:
+        actor_graph.setdefault(id1, set()).add(id2)
+        actor_graph.setdefault(id2, set()).add(id1)
+    return actor_graph
+
+
 def get_actors_with_bacon_number(data, n):
-    raise NotImplementedError("Implement me!")
+    """Return a set of actors with Bacon Number of n"""
+    result = {BACON_NUMBER}
+    closed = set()
+    graph = get_actor_graph(data)
+    for _ in range(n):
+        closed |= result
+        for i in result.copy():
+            result |= graph[i]
+        result -= closed
+        if not result:
+            break
+    return result
 
 
 def get_bacon_path(data, actor_id):
@@ -54,3 +75,9 @@ if __name__ == '__main__':
           did_x_and_y_act_together(smalldb,
                                    get_value(names, "Christopher Showerman"),
                                    get_value(names, "Lew Knopp")))
+
+    with open('resources/large.json') as f:
+        largedb = json.load(f)
+
+    bacon_6 = ', '.join(get_value(ids, actor_id) for actor_id in get_actors_with_bacon_number(largedb, 6))
+    print(f"Actors with Bacon Number of 6 are: {bacon_6}")
