@@ -2,17 +2,35 @@
 
 import json
 
+
 def did_x_and_y_act_together(data, actor_id_1, actor_id_2):
-    raise NotImplementedError("Implement me!")
+    """Return True if actors acted in the same film"""
+    return any(id_1 == actor_id_1 and id_2 == actor_id_2
+               or id_1 == actor_id_2 and id_2 == actor_id_1
+               for id_1, id_2, _ in data)
+
+
+def invert_dict(dict):
+    """Create a new dictionary, where keys are dict.values and otherwise"""
+    return {v: k for k, v in dict.items()}
+
+
+def get_value(dict, key):
+    """Return a dict value by the key"""
+    return dict[key]
+
 
 def get_actors_with_bacon_number(data, n):
     raise NotImplementedError("Implement me!")
 
+
 def get_bacon_path(data, actor_id):
     raise NotImplementedError("Implement me!")
 
+
 def get_path(data, actor_id_1, actor_id_2):
     raise NotImplementedError("Implement me!")
+
 
 if __name__ == '__main__':
     with open('resources/small.json') as f:
@@ -21,4 +39,18 @@ if __name__ == '__main__':
     # additional code here will be run only when lab.py is invoked directly
     # (not when imported from test.py), so this is a good place to put code
     # used, for example, to generate the results for the online questions.
-    pass
+    with open('resources/names.json') as f:
+        names = json.load(f)
+    ids = invert_dict(names)
+
+    print(f"Jerome Savary's ID number is {names['Jerome Savary']}")
+    print(f"{ids[1085707]} has the ID 1085707")
+
+    print("Geena Davis and David Clennon acted together? It is",
+          did_x_and_y_act_together(smalldb,
+                                   get_value(names, "Geena Davis"),
+                                   get_value(names, "David Clennon")))
+    print("Christopher Showerman and Lew Knopp acted together? It is",
+          did_x_and_y_act_together(smalldb,
+                                   get_value(names, "Christopher Showerman"),
+                                   get_value(names, "Lew Knopp")))
