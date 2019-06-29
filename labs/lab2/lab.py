@@ -4,6 +4,7 @@ import json
 
 BACON_NUMBER = 4724
 
+
 def did_x_and_y_act_together(data, actor_id_1, actor_id_2):
     """Return True if actors acted in the same film"""
     return any(id_1 == actor_id_1 and id_2 == actor_id_2
@@ -46,7 +47,24 @@ def get_actors_with_bacon_number(data, n):
 
 
 def get_bacon_path(data, actor_id):
-    raise NotImplementedError("Implement me!")
+    """Return path from Bacon to actor"""
+    graph = get_actor_graph(data)
+    fringe = {BACON_NUMBER}
+    next_fringe = set()
+    paths = {BACON_NUMBER: [BACON_NUMBER]}
+    if actor_id == BACON_NUMBER:
+        return paths[BACON_NUMBER]
+    while fringe:
+        for node in fringe:
+            children = graph[node]
+            if actor_id in children:
+                return paths[node] + [actor_id]
+            for child in children:
+                if child not in paths:
+                    next_fringe.add(child)
+                    paths[child] = paths[node] + [child]
+        fringe = next_fringe
+        next_fringe = set()
 
 
 def get_path(data, actor_id_1, actor_id_2):
@@ -79,5 +97,10 @@ if __name__ == '__main__':
     with open('resources/large.json') as f:
         largedb = json.load(f)
 
-    bacon_6 = ', '.join(get_value(ids, actor_id) for actor_id in get_actors_with_bacon_number(largedb, 6))
+    bacon_6 = ', '.join(get_value(ids, actor_id)
+                        for actor_id in get_actors_with_bacon_number(largedb, 6))
     print(f"Actors with Bacon Number of 6 are: {bacon_6}")
+
+    path_to_miller = [get_value(ids, actor_id)
+                      for actor_id in get_bacon_path(largedb, get_value(names, "Rube Miller"))]
+    print("Path from Kevin Bacon to Rube Miller is:", path_to_miller)
