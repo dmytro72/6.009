@@ -48,27 +48,28 @@ def get_actors_with_bacon_number(data, n):
 
 def get_bacon_path(data, actor_id):
     """Return path from Bacon to actor"""
+    return get_path(data, BACON_NUMBER, actor_id)
+
+
+def get_path(data, actor_id_1, actor_id_2):
+    """Return path from actor_1 to actor_2"""
     graph = get_actor_graph(data)
-    fringe = {BACON_NUMBER}
+    fringe = {actor_id_1}
     next_fringe = set()
-    paths = {BACON_NUMBER: [BACON_NUMBER]}
-    if actor_id == BACON_NUMBER:
-        return paths[BACON_NUMBER]
+    paths = {actor_id_1: [actor_id_1]}
+    if actor_id_2 == actor_id_1:
+        return paths[actor_id_1]
     while fringe:
         for node in fringe:
             children = graph[node]
-            if actor_id in children:
-                return paths[node] + [actor_id]
+            if actor_id_2 in children:
+                return paths[node] + [actor_id_2]
             for child in children:
                 if child not in paths:
                     next_fringe.add(child)
                     paths[child] = paths[node] + [child]
         fringe = next_fringe
         next_fringe = set()
-
-
-def get_path(data, actor_id_1, actor_id_2):
-    raise NotImplementedError("Implement me!")
 
 
 if __name__ == '__main__':
@@ -102,5 +103,12 @@ if __name__ == '__main__':
     print(f"Actors with Bacon Number of 6 are: {bacon_6}")
 
     path_to_miller = [get_value(ids, actor_id)
-                      for actor_id in get_bacon_path(largedb, get_value(names, "Rube Miller"))]
+                      for actor_id in get_bacon_path(largedb,
+                                                     get_value(names, "Rube Miller"))]
     print("Path from Kevin Bacon to Rube Miller is:", path_to_miller)
+
+    hayes_to_page = [get_value(ids, actor_id)
+                     for actor_id in get_path(largedb,
+                                              get_value(names, "Venice Hayes"),
+                                              get_value(names, "Ellen Page"))]
+    print("Path from Venice Hayes to Ellen Page is:", hayes_to_page)
