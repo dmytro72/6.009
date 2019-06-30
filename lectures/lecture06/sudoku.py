@@ -17,23 +17,22 @@ def findNextCellToFill(grid):
 
 #This procedure checks if setting the (i, j) square to e is valid
 def isValid(grid, i, j, e):
-    rowOk = all([e != grid[i][x] for x in range(9)])
-    if rowOk:
-        columnOk = all([e != grid[x][j] for x in range(9)])
-        if columnOk:
-            #finding the top left x,y co-ordinates of
-            #the section or sub-grid containing the i,j cell
-            secTopX, secTopY = 3 *(i//3), 3 *(j//3)
-            for x in range(secTopX, secTopX+3):
-                for y in range(secTopY, secTopY+3):
-                    if grid[x][y] == e:
-                        return False
-            return True
+    # check column and row
+    if all(e != grid[i][x] for x in range(9)) \
+    and all(e != grid[x][j] for x in range(9)):
+        #finding the top left x,y co-ordinates of
+        #the section or sub-grid containing the i,j cell
+        secTopX, secTopY = 3 *(i//3), 3 *(j//3)
+        for x in range(secTopX, secTopX+3):
+            for y in range(secTopY, secTopY+3):
+                if grid[x][y] == e:
+                    return False
+        return True
     return False
 
 #This procedure fills in the missing squares of a Sudoku puzzle
 #obeying the Sudoku rules through brute-force guessing and checking
-def solveSudoku(grid, i=0, j=0):
+def solveSudoku(grid):
 
     global backtracks
 
@@ -46,7 +45,7 @@ def solveSudoku(grid, i=0, j=0):
         #Try different values in i, j location
         if isValid(grid, i, j, e):
             grid[i][j] = e
-            if solveSudoku(grid, i, j):
+            if solveSudoku(grid):
                 return True
             
             #Undo the current cell for backtracking
