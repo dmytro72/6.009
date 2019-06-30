@@ -72,6 +72,28 @@ def get_path(data, actor_id_1, actor_id_2):
         next_fringe = set()
 
 
+def get_movie_graph(data):
+    """Create graph of movies"""
+    result = {}
+    for id_1, id_2, movie, in data:
+        result.setdefault(movie, set()).add(frozenset((id_1, id_2)))
+    return result
+
+
+def get_movie_path(data, actor_id_1, actor_id_2):
+    """Return movie path connected two actors"""
+    actor_path = get_path(data, actor_id_1, actor_id_2)
+    actor_pair = [frozenset(pair) for pair in zip(actor_path, actor_path[1:])]
+    movie_graph = get_movie_graph(data)
+    result = []
+    for pair in actor_pair:
+        for key, val in movie_graph.items():
+            if pair in val:
+                result.append(key)
+                break
+    return result
+
+
 if __name__ == '__main__':
     with open('resources/small.json') as f:
         smalldb = json.load(f)
@@ -112,3 +134,13 @@ if __name__ == '__main__':
                                               get_value(names, "Venice Hayes"),
                                               get_value(names, "Ellen Page"))]
     print("Path from Venice Hayes to Ellen Page is:", hayes_to_page)
+
+    with open('resources/movies.json') as f:
+        movies = json.load(f)
+    movie_ids = invert_dict(movies)
+
+    movie_streep_ilacovac = [get_value(movie_ids, movie_id)
+                             for movie_id in get_movie_path(largedb,
+                                                            get_value(names, "Meryl Streep"),
+                                                            get_value(names, "Iva Ilakovac"))]
+    print("Movie path from Meryl Streep to Iva Ilakovac is:", movie_streep_ilacovac)

@@ -72,6 +72,12 @@ class TestTiny(unittest.TestCase):
         expected = [1640, 2876, 1532]
         self.assertEqual(result, expected)
 
+    def test_10(self):
+        # movie path from 1640 to 1532
+        result = lab.get_movie_path(self.data, 1640, 1532)
+        expected = [617, 31932]
+        self.assertEqual(result, expected)
+
 
 class TestActedTogether(unittest.TestCase):
     def setUp(self):
